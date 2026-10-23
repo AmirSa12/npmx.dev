@@ -5533,9 +5533,6 @@
         "by_locale": {
           "type": "string"
         },
-        "by_file": {
-          "type": "string"
-        },
         "complete_text": {
           "type": "string"
         },
@@ -5547,27 +5544,6 @@
         },
         "progress_label": {
           "type": "string"
-        },
-        "table": {
-          "type": "object",
-          "properties": {
-            "file": {
-              "type": "string"
-            },
-            "status": {
-              "type": "string"
-            },
-            "error": {
-              "type": "string"
-            },
-            "empty": {
-              "type": "string"
-            },
-            "file_link": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
         }
       },
       "additionalProperties": false
