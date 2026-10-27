@@ -37,10 +37,10 @@ export interface ExtendedPackageJson {
   /** npm maintainers (returned by registry API) */
   maintainers?: Array<{ name: string; email?: string }>
   /** Repository info (returned by registry API) */
-  repository?: { url?: string; type?: string; directory?: string }
+  repository?: { url?: string; type?: string; directory?: string } | string
 }
 
-export type PackageExports = string | null | { [key: string]: PackageExports } | PackageExports[]
+type PackageExports = string | null | { [key: string]: PackageExports } | PackageExports[]
 
 /**
  * Detect the module format of a package based on package.json fields
@@ -180,7 +180,7 @@ function mergeExportsAnalysis(target: ExportsAnalysis, source: ExportsAnalysis):
 }
 
 /** Info about a related package (@types or create-*) */
-export interface RelatedPackageInfo {
+interface RelatedPackageInfo {
   packageName: string
   deprecated?: string
 }
