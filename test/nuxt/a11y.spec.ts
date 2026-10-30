@@ -4121,6 +4121,7 @@ describe('component accessibility audits', () => {
     it('should have no accessibility violations', async () => {
       const component = await mountSuspended(PackageSecurityDowngradeAlert, {
         props: {
+          packageName: 'vue',
           downgrade: {
             downgradedVersion: '2.0.0',
             downgradedTrustLevel: 'none',
