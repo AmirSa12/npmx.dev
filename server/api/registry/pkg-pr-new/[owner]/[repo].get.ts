@@ -1,20 +1,22 @@
-interface PkgPrNewAvailabilityResponse {
-  hasReleases: boolean
-  url: string
-}
+import type { H3Event } from 'h3'
 
 const PKG_PR_NEW_TTL_SECONDS = 60
 const PKG_PR_NEW_TIMEOUT_MS = 3000
 
-function toSegment(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : ''
+function toSegment(value: string | undefined): string {
+  return value?.trim() ?? ''
+}
+
+function getRepoParams(event: H3Event) {
+  return {
+    owner: toSegment(getRouterParam(event, 'owner', { decode: true })),
+    repo: toSegment(getRouterParam(event, 'repo', { decode: true })),
+  }
 }
 
 export default defineCachedEventHandler(
-  async (event): Promise<PkgPrNewAvailabilityResponse> => {
-    const query = getQuery(event)
-    const owner = toSegment(query.owner)
-    const repo = toSegment(query.repo)
+  async (event): Promise<PkgPrNewAvailability> => {
+    const { owner, repo } = getRepoParams(event)
 
     if (!owner || !repo) {
       throw createError({
@@ -47,10 +49,8 @@ export default defineCachedEventHandler(
     swr: true,
     name: 'pkg-pr-new-availability',
     getKey: event => {
-      const query = getQuery(event)
-      const owner = toSegment(query.owner).toLowerCase()
-      const repo = toSegment(query.repo).toLowerCase()
-      return `pkg-pr-new:${owner}/${repo}`
+      const { owner, repo } = getRepoParams(event)
+      return `pkg-pr-new:${owner.toLowerCase()}/${repo.toLowerCase()}`
     },
   },
 )

@@ -7,10 +7,10 @@ vi.stubGlobal('defineCachedEventHandler', (fn: Function) => fn)
 vi.stubGlobal('createError', createError)
 vi.stubGlobal('$fetch', { raw: fetchRawMock })
 
-let queryParams: Record<string, string> = {}
-vi.stubGlobal('getQuery', () => queryParams)
+let routerParams: Record<string, string> = {}
+vi.stubGlobal('getRouterParam', (_event: H3Event, name: string) => routerParams[name])
 
-const handler = (await import('#server/api/registry/pkg-pr-new.get')).default
+const handler = (await import('#server/api/registry/pkg-pr-new/[owner]/[repo].get')).default
 
 const fakeEvent = {} as H3Event
 
@@ -21,16 +21,16 @@ afterAll(() => {
 describe('pkg-pr-new availability API', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    queryParams = {}
+    routerParams = {}
   })
 
   it('throws 400 when owner/repo are missing', async () => {
-    queryParams = { owner: 'vitejs' }
+    routerParams = { owner: 'vitejs' }
     await expect(handler(fakeEvent)).rejects.toMatchObject({ statusCode: 400 })
   })
 
   it('returns hasReleases true when x-has-releases is 1', async () => {
-    queryParams = { owner: 'vitejs', repo: 'vite' }
+    routerParams = { owner: 'vitejs', repo: 'vite' }
     fetchRawMock.mockResolvedValue({
       headers: {
         get: (name: string) => (name === 'x-has-releases' ? '1' : null),
@@ -51,7 +51,7 @@ describe('pkg-pr-new availability API', () => {
   })
 
   it('returns hasReleases false when x-has-releases is 0', async () => {
-    queryParams = { owner: 'owner', repo: 'repo' }
+    routerParams = { owner: 'owner', repo: 'repo' }
     fetchRawMock.mockResolvedValue({
       headers: {
         get: (name: string) => (name === 'x-has-releases' ? '0' : null),
@@ -67,7 +67,7 @@ describe('pkg-pr-new availability API', () => {
   })
 
   it('returns hasReleases false when the HEAD request fails', async () => {
-    queryParams = { owner: 'owner', repo: 'repo' }
+    routerParams = { owner: 'owner', repo: 'repo' }
     fetchRawMock.mockRejectedValue(new Error('network error'))
 
     const result = await handler(fakeEvent)

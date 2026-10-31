@@ -1095,13 +1095,8 @@ function majorGroupContainsCurrent(group: (typeof otherMajorGroups.value)[0]): b
         v-if="previewReleasesUrl"
         class="mt-2 border-t border-border/70 pt-2 px-1 text-xs text-fg-muted"
       >
-        <LinkBase
-          :to="previewReleasesUrl"
-          class="inline-flex items-center gap-1 hover:text-fg transition-colors"
-          classicon="i-lucide:external-link"
-          data-testid="preview-releases-link"
-        >
-          Preview releases
+        <LinkBase :to="previewReleasesUrl" data-testid="preview-releases-link">
+          {{ $t('package.versions.preview_releases') }}
         </LinkBase>
       </div>
     </div>

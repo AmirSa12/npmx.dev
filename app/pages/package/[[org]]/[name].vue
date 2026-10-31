@@ -396,33 +396,22 @@ const githubRepoRef = computed(() => {
   if (ref?.provider !== 'github' || !ref.owner || !ref.repo) return null
   return ref
 })
-const rawPreviewReleasesUrl = computed(() => {
-  const ref = githubRepoRef.value
-  if (!ref) return null
-
-  return `https://pkg.pr.new/~/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}`
-})
-const { data: previewReleasesAvailability } = useLazyFetch<{
-  hasReleases: boolean
-  url: string | null
-}>(
+// Client-only: a link at the bottom of the versions list isn't worth blocking SSR on pkg.pr.new
+const { data: previewReleasesAvailability } = useLazyFetch<PkgPrNewAvailability | null>(
   () => {
     const ref = githubRepoRef.value
     if (!ref) return ''
-    return `/api/registry/pkg-pr-new?owner=${encodeURIComponent(ref.owner)}&repo=${encodeURIComponent(ref.repo)}`
+    return `/api/registry/pkg-pr-new/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}`
   },
   {
-    watch: [githubRepoRef],
-    default: () => ({
-      hasReleases: false,
-      url: null,
-    }),
+    enabled: () => !!githubRepoRef.value,
+    server: false,
+    default: () => null,
   },
 )
-const previewReleasesUrl = computed(() => {
-  if (!previewReleasesAvailability.value?.hasReleases) return null
-  return previewReleasesAvailability.value.url ?? rawPreviewReleasesUrl.value
-})
+const previewReleasesUrl = computed(() =>
+  previewReleasesAvailability.value?.hasReleases ? previewReleasesAvailability.value.url : null,
+)
 
 // Check if a version has provenance/attestations
 // The dist object may have attestations that aren't in the base type
