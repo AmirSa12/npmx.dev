@@ -29,6 +29,17 @@ describe('pkg-pr-new availability API', () => {
     await expect(handler(fakeEvent)).rejects.toMatchObject({ statusCode: 400 })
   })
 
+  it.each([
+    { owner: '..', repo: 'vite' },
+    { owner: 'vitejs', repo: '.' },
+    { owner: 'vitejs/vite', repo: 'vite' },
+    { owner: 'vitejs', repo: 'vite/../x' },
+  ])('throws 400 for invalid owner/repo $owner/$repo', async params => {
+    routerParams = params
+    await expect(handler(fakeEvent)).rejects.toMatchObject({ statusCode: 400 })
+    expect(fetchRawMock).not.toHaveBeenCalled()
+  })
+
   it('returns hasReleases true when x-has-releases is 1', async () => {
     routerParams = { owner: 'vitejs', repo: 'vite' }
     fetchRawMock.mockResolvedValue({

@@ -397,21 +397,27 @@ const githubRepoRef = computed(() => {
   return ref
 })
 // Client-only: a link at the bottom of the versions list isn't worth blocking SSR on pkg.pr.new
-const { data: previewReleasesAvailability } = useLazyFetch<PkgPrNewAvailability | null>(
-  () => {
-    const ref = githubRepoRef.value
-    if (!ref) return ''
-    return `/api/registry/pkg-pr-new/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}`
-  },
-  {
-    enabled: () => !!githubRepoRef.value,
-    server: false,
-    default: () => null,
-  },
-)
-const previewReleasesUrl = computed(() =>
-  previewReleasesAvailability.value?.hasReleases ? previewReleasesAvailability.value.url : null,
-)
+const { data: previewReleasesAvailability, status: previewReleasesStatus } =
+  useLazyFetch<PkgPrNewAvailability | null>(
+    () => {
+      const ref = githubRepoRef.value
+      if (!ref) return ''
+      return `/api/registry/pkg-pr-new/${encodeURIComponent(ref.owner)}/${encodeURIComponent(ref.repo)}`
+    },
+    {
+      enabled: () => !!githubRepoRef.value,
+      server: false,
+      default: () => null,
+    },
+  )
+// Nuxt carries the previous repository's data over to the new key until its request settles,
+// so only trust a response that succeeded for the current repository
+const previewReleasesUrl = computed(() => {
+  if (previewReleasesStatus.value !== 'success') return null
+  return previewReleasesAvailability.value?.hasReleases
+    ? previewReleasesAvailability.value.url
+    : null
+})
 
 // Check if a version has provenance/attestations
 // The dist object may have attestations that aren't in the base type

@@ -2,6 +2,8 @@ import type { H3Event } from 'h3'
 
 const PKG_PR_NEW_TTL_SECONDS = 60
 const PKG_PR_NEW_TIMEOUT_MS = 3000
+// GitHub owner and repository names only use letters, digits, `-`, `_` and `.`, and are never `.` or `..`
+const GITHUB_NAME_RE = /^(?!\.\.?$)[\w.-]+$/
 
 function toSegment(value: string | undefined): string {
   return value?.trim() ?? ''
@@ -18,10 +20,10 @@ export default defineCachedEventHandler(
   async (event): Promise<PkgPrNewAvailability> => {
     const { owner, repo } = getRepoParams(event)
 
-    if (!owner || !repo) {
+    if (!GITHUB_NAME_RE.test(owner) || !GITHUB_NAME_RE.test(repo)) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing owner/repo',
+        statusMessage: 'Invalid owner/repo',
       })
     }
 
